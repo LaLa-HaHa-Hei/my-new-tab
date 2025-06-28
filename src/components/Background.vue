@@ -48,13 +48,13 @@
                                 :value="item.value" />
                         </el-select>
                     </el-form-item>
-                    <div>若使用“每日获取”功能，请访问<a href="https://cors.sh/" target="_blank"
-                            style="color: #409EFF;">cors.sh</a>获取一个免费的Key填入下方</div>
+                    <!-- <div>若使用“每日获取”功能，请访问<a href="https://cors.sh/" target="_blank"
+                            style="color: #409EFF;">cors.sh</a>获取一个免费的API Key填入下方</div>
                     <div>一般临时Key有效期3天，注意更新</div>
                     <el-form-item label="cors.sh Key">
                         <el-input v-model="backgroundStore.backgroundConfig.onlineImageConfig.corsShKey"
-                            placeholder="cors.sh Key" />
-                    </el-form-item>
+                            placeholder="cors.sh API Key" />
+                    </el-form-item> -->
                 </el-form>
             </el-splitter-panel>
         </el-splitter>
@@ -63,60 +63,48 @@
 
 <script setup lang="ts">
 const BACKGROUND_CONFIG_KEY = 'backgroundConfig'
-import { ref, onBeforeMount, computed } from 'vue'
+import { ref, computed } from 'vue'
 import IconEdit from './icons/IconEdit.vue'
-import storage from '@/utils/storage'
 import { fileToBase64 } from '@/utils/base64Utils';
 import { ElMessage } from 'element-plus'
-import type { BackgroundConfig } from '@/types'
 import { useBackgroundStore } from '@/stores/background'
-import axios from 'axios';
 
 const editDialogVisible = ref(false)
-const modeOptions = ref([{ value: 'daily', label: '每日获取' }, { value: 'dynamic', label: '每次获取' }])
+const modeOptions = ref([{ value: 'dynamic', label: '每次获取' }])
 const backgroundStore = useBackgroundStore()
 const imageUrl = computed(
     () => backgroundStore.backgroundConfig.useOnlineImage ?
         (backgroundStore.backgroundConfig.onlineImageConfig.mode === 'dynamic' ? backgroundStore.backgroundConfig.onlineImageConfig.url : backgroundStore.backgroundConfig.onlineImageConfig.imageUrl) : backgroundStore.backgroundConfig.localImageConfig.imageUrl)
 
-onBeforeMount(async () => {
-    await updateBackgroundImg()
-})
+// onBeforeMount(async () => {
+//     await updateBackgroundImg()
+// })
 
-const updateBackgroundImg = async () => {
-    if (backgroundStore.backgroundConfig.useOnlineImage && backgroundStore.backgroundConfig.onlineImageConfig.mode === 'daily') {
-        // 如果是每日获取，检查是否需要更新图片
-        const currentTime = Date.now();
-        const lastFetchTime = backgroundStore.backgroundConfig.onlineImageConfig.lastFetchTime;
-        const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
+// 无法解决跨域问题，暂时放弃
+// const updateBackgroundImg = async () => {
+//     if (backgroundStore.backgroundConfig.useOnlineImage && backgroundStore.backgroundConfig.onlineImageConfig.mode === 'daily') {
+//         // 如果是每日获取，检查是否需要更新图片
+//         const currentTime = Date.now();
+//         const lastFetchTime = backgroundStore.backgroundConfig.onlineImageConfig.lastFetchTime;
+//         const oneDay = 24 * 60 * 60 * 1000; // 一天的毫秒数
 
-        if (currentTime - lastFetchTime > oneDay || backgroundStore.backgroundConfig.onlineImageConfig.imageUrl === 'no image') {
-            // 更新图片地址
-            try {
-                const targetUrl = backgroundStore.backgroundConfig.onlineImageConfig.url;
-                // const encodedUrl = encodeURIComponent(targetUrl);
-                const response = await axios.get(`https://proxy.cors.sh/${targetUrl}`, {
-                    headers: { 'x-cors-api-key': backgroundStore.backgroundConfig.onlineImageConfig.corsShKey },
-                    responseType: 'blob'
-                });
-                const base64String = await fileToBase64(response.data);
-                backgroundStore.backgroundConfig.onlineImageConfig.imageUrl = base64String
-                backgroundStore.backgroundConfig.onlineImageConfig.lastFetchTime = currentTime;
-                backgroundStore.saveConfig()
-            }
-            catch (error) {
-                ElMessage.error(`获取图片失败：${error}`);
-                backgroundStore.backgroundConfig.onlineImageConfig.imageUrl = 'no image'
-            }
-        }
-    }
-}
+//         if (currentTime - lastFetchTime > oneDay || backgroundStore.backgroundConfig.onlineImageConfig.imageUrl === '') {
+//             // 更新图片地址
+//             try {
+//             }
+//             catch (error) {
+//                 ElMessage.error(`获取图片失败：${error}`);
+//                 backgroundStore.backgroundConfig.onlineImageConfig.imageUrl = ''
+//             }
+//         }
+//     }
+// }
 
 const handleEditDialogClose = async (done: () => void) => {
     backgroundStore.saveConfig()
     done()
     ElMessage.success('成功保存设置')
-    await updateBackgroundImg()
+    // await updateBackgroundImg()
 }
 
 const handleChange = async (uploadFile: any) => {

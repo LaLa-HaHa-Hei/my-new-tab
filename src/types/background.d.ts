@@ -5,7 +5,6 @@ export interface BackgroundConfig {
         imageUrl: string,
         mode: string,
         lastFetchTime: number,
-        corsShKey: ''
     },
     localImageConfig: {
         imageUrl: string

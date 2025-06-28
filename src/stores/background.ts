@@ -9,10 +9,9 @@ export const useBackgroundStore = defineStore('background', () => {
         useOnlineImage: false,
         onlineImageConfig: {
             url: 'https://bing.img.run/rand_1366x768.php',
-            imageUrl: 'no image',
+            imageUrl: '',
             mode: 'dynamic',
             lastFetchTime: 0,
-            corsShKey: ''
         },
         localImageConfig: {
             imageUrl: './backgrounds/dye.png'
