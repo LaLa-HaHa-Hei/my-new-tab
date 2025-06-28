@@ -1,1 +1,2 @@
-export * from './searchBoxConfig'
+export * from './searchBox'
+export * from './background'

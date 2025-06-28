@@ -1,7 +1,7 @@
 <template>
     <div class="w-full grid gap-2"
-        :class="{ 'grid-cols-1': columnNum === 1, 'grid-cols-2': columnNum === 2, 'grid-cols-3': columnNum === 3, 'grid-cols-4': columnNum === 4, 'grid-cols-5': columnNum === 5, 'grid-cols-6': columnNum === 6, }">
-        <template v-for="(item, index) in searchBoxList" :key="index">
+        :class="{ 'grid-cols-1': searchBoxStore.columns === 1, 'grid-cols-2': searchBoxStore.columns === 2, 'grid-cols-3': searchBoxStore.columns === 3, 'grid-cols-4': searchBoxStore.columns === 4, 'grid-cols-5': searchBoxStore.columns === 5, 'grid-cols-6': searchBoxStore.columns === 6, }">
+        <template v-for="item in searchBoxStore.usedSearchBoxes" :key="item.id">
             <SearchBox v-if="item.isUsed" :config="item" />
         </template>
 
@@ -19,14 +19,15 @@
         <div class="flex justify-between">
             <div>
                 <span>列数：</span>
-                <el-input-number size="small" v-model="columnNum" :min="1" :max="6" />
+                <el-input-number size="small" v-model="searchBoxStore.searchBoxContainerConfig.columns" :min="1"
+                    :max="6" />
             </div>
             <div><span>注意：该弹窗口关闭后才会保存更改到本地</span></div>
             <div>
                 <el-button type="primary" size="small" @click="addDialogVisible = true">添加</el-button>
             </div>
         </div>
-        <el-table :data="searchBoxList" border class="w-full mt-3">
+        <el-table :data="searchBoxStore.searchBoxes" border class="w-full mt-3">
             <el-table-column label="使用" width="55">
                 <template #default="scope"><el-switch size="small" v-model="scope.row.isUsed" /></template>
             </el-table-column>
@@ -46,7 +47,7 @@
                 <template #default="scope">
                     <el-button size="small" @click="handleMoveUp(scope.$index)">↑</el-button>
                     <el-button size="small" @click="handleMoveDown(scope.$index)">↓</el-button>
-                    <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+                    <el-button size="small" type="danger" @click="handleDelete(scope.$index)">删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -54,18 +55,18 @@
 
     <!-- 添加弹窗 -->
     <el-dialog v-model="addDialogVisible" title="添加搜索引擎" width="50%" :before-close="handleAddDialogClose">
-        <el-form :model="newSearchBoxConfig" label-width="auto">
+        <el-form :model="newSearchBoxItem" label-width="auto">
             <el-form-item label="图标">
-                <img :src="newSearchBoxConfig.icon" alt="" class="h-7" />
+                <img :src="newSearchBoxItem.icon" alt="" class="h-7" />
             </el-form-item>
             <el-form-item label="图标URL">
-                <el-input v-model="newSearchBoxConfig.icon" />
+                <el-input v-model="newSearchBoxItem.icon" />
             </el-form-item>
             <el-form-item label="提示词">
-                <el-input v-model="newSearchBoxConfig.placeholder" />
+                <el-input v-model="newSearchBoxItem.placeholder" />
             </el-form-item>
             <el-form-item label="URL（%s为搜索词）">
-                <el-input v-model="newSearchBoxConfig.searchUrl" />
+                <el-input v-model="newSearchBoxItem.searchUrl" />
             </el-form-item>
             <el-form-item>
                 <div class="w-full flex justify-center">
@@ -77,97 +78,54 @@
 </template>
 
 <script setup lang="ts">
-const SEARCH_BOX_LIST_KEY = 'searchBoxList'
-const SEARCH_BOX_COLUMN_NUM_KEY = 'searchBoxColumnNum'
-
-import type { SearchBoxConfig } from '@/types'
+import type { SearchBoxConfig, SearchBoxContainerConfig } from '@/types'
 import { ref } from 'vue'
 import SearchBox from './SearchBox.vue'
-import storage from '@/utils/storage'
 import IconEdit from './icons/IconEdit.vue'
 import { ElMessage } from 'element-plus'
+import { useSearchBoxStore } from '@/stores/searchBox'
+import { ElMessageBox } from 'element-plus'
 
 const editDialogVisible = ref(false)
 const addDialogVisible = ref(false)
-const columnNum = ref(3)
-const newSearchBoxConfig = ref<SearchBoxConfig>({
+const searchBoxStore = useSearchBoxStore()
+const newSearchBoxItem = ref<Partial<SearchBoxConfig>>({
     isUsed: true,
     placeholder: '',
     icon: '',
     searchUrl: ''
 })
-const searchBoxList = ref<SearchBoxConfig[]>([
-    {
-        isUsed: true,
-        placeholder: 'Bing',
-        icon: "./search-engine-icons/bing.svg",
-        searchUrl: 'https://www.bing.com/search?q=%s'
-    },
-    {
-        isUsed: true,
-        placeholder: 'DuckDuckGo',
-        icon: "./search-engine-icons/duck-duck-go.svg",
-        searchUrl: 'https://duckduckgo.com/?q=%s'
-    },
-    {
-        isUsed: true,
-        placeholder: 'Google',
-        icon: "./search-engine-icons/google.svg",
-        searchUrl: 'https://www.google.com/search?q=%s'
-    },
-    {
-        isUsed: true,
-        placeholder: 'Baidu',
-        icon: "./search-engine-icons/baidu.svg",
-        searchUrl: 'https://www.baidu.com/s?wd=%s'
-    },
-    {
-        isUsed: true,
-        placeholder: 'Bilibili',
-        icon: "./search-engine-icons/bilibili.svg",
-        searchUrl: 'https://search.bilibili.com/all?keyword=%s'
-    },
-    {
-        isUsed: true,
-        placeholder: 'Yandex',
-        icon: "./search-engine-icons/yandex.svg",
-        searchUrl: 'https://yandex.com/search/?text=%s'
-    },
-    {
-        isUsed: false,
-        placeholder: '矢量图',
-        icon: "./search-engine-icons/iconfont.svg",
-        searchUrl: 'https://www.iconfont.cn/search/index?searchType=icon&q=%s'
-    },
-])
 
-columnNum.value = storage.getItem<number>(SEARCH_BOX_COLUMN_NUM_KEY) || columnNum.value
-searchBoxList.value = storage.getItem<SearchBoxConfig[]>(SEARCH_BOX_LIST_KEY) || searchBoxList.value
-
-const handleDelete = (index: number, row: SearchBoxConfig) => {
-    searchBoxList.value.splice(index, 1)
+const handleDelete = (index: number) => {
+    ElMessageBox.confirm('确定删除吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning',
+    }).then(() => {
+        searchBoxStore.deleteSearchBox(index)
+    }).catch(() => {
+    })
 }
 
 const handleMoveUp = (index: number) => {
     if (index <= 0) return
-    [searchBoxList.value[index - 1], searchBoxList.value[index]] = [searchBoxList.value[index], searchBoxList.value[index - 1]]
+    searchBoxStore.moveSearchBox(index, index - 1)
 }
 
 const handleMoveDown = (index: number) => {
-    if (index >= searchBoxList.value.length - 1) return
-    [searchBoxList.value[index], searchBoxList.value[index + 1]] = [searchBoxList.value[index + 1], searchBoxList.value[index]]
+    if (index >= searchBoxStore.searchBoxes.length - 1) return
+    searchBoxStore.moveSearchBox(index, index + 1)
 }
 
 const handleEditDialogClose = (done: () => void) => {
+    searchBoxStore.saveConfig()
     done()
-    storage.setItem(SEARCH_BOX_LIST_KEY, searchBoxList.value)
-    storage.setItem(SEARCH_BOX_COLUMN_NUM_KEY, columnNum.value)
-    ElMessage.success('成功保存设置')
+    ElMessage.success('保存成功')
 }
 
 const handleAddDialogClose = (done: () => void) => {
     done()
-    newSearchBoxConfig.value = {
+    newSearchBoxItem.value = {
         isUsed: true,
         placeholder: '',
         icon: '',
@@ -176,15 +134,16 @@ const handleAddDialogClose = (done: () => void) => {
 }
 
 const handleAdd = () => {
-    searchBoxList.value.push({ ...newSearchBoxConfig.value })
-    storage.setItem(SEARCH_BOX_LIST_KEY, searchBoxList.value)
+    searchBoxStore.addSearchBox(newSearchBoxItem.value)
+    searchBoxStore.saveConfig()
     // 重置表单
-    newSearchBoxConfig.value = {
+    newSearchBoxItem.value = {
         isUsed: true,
         placeholder: '',
         icon: '',
         searchUrl: ''
     }
     addDialogVisible.value = false
+    ElMessage.success('保存成功')
 }
 </script>

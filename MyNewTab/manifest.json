@@ -3,7 +3,6 @@
 	"name": "My New Tab",
 	"version": "1.0.0",
 	"description": "增强新标签页功能，可同时显示多个搜索引擎",
-	"default_locale": "zh",
 	"chrome_url_overrides": {
 		"newtab": "newtab/index.html"
 	},
