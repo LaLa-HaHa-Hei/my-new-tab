@@ -8,5 +8,5 @@ export interface SearchBoxConfig {
 
 export interface SearchBoxContainerConfig {
     columns: number,
-    searchBoxes: SearchBoxConfig[],
+    items: SearchBoxConfig[],
 }

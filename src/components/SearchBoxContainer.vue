@@ -6,9 +6,9 @@
         </template>
 
         <!-- 编辑按钮 -->
-        <div class="h-11 w-11 bg-white/60 rounded-full overflow-hidden">
+        <div class="h-11 w-11 bg-white/30 hover:bg-white/40 rounded-full overflow-hidden">
             <button @click="editDialogVisible = true"
-                class="w-full h-full p-2 flex justify-center items-center cursor-pointer text-gray-600">
+                class="w-full h-full p-2 flex justify-center items-center cursor-pointer text-white/50">
                 <IconEdit />
             </button>
         </div>

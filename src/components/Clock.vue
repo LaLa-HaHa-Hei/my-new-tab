@@ -1,5 +1,5 @@
 <template>
-    <div class="w-full text-white text-center">
+    <div class="w-full text-white/50 text-center">
         <div class="text-6xl font-medium">{{ formattedDateTime.hour }}:{{ formattedDateTime.minute }}</div>
         <div class="text-lg font-medium mt-2">{{ formattedDateTime.month }}月{{ formattedDateTime.day }}日</div>
     </div>

@@ -7,7 +7,7 @@ const SEARCH_BOX_CONTAINER_CONFIG_KEY = 'searchBoxContainerConfig'
 export const useSearchBoxStore = defineStore('searchBox', () => {
     const getDefaultConfig = (): SearchBoxContainerConfig => ({
         columns: 3,
-        searchBoxes: [
+        items: [
             {
                 id: '1751116407846',
                 isUsed: true,
@@ -61,11 +61,11 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
     })
     const searchBoxContainerConfig: Ref<SearchBoxContainerConfig> = ref<SearchBoxContainerConfig>(storage.getItem(SEARCH_BOX_CONTAINER_CONFIG_KEY) || getDefaultConfig());
 
-    const searchBoxes = computed(() => searchBoxContainerConfig.value.searchBoxes)
+    const searchBoxes = computed(() => searchBoxContainerConfig.value.items)
 
     // 仅获取已启用的搜索框
     const usedSearchBoxes = computed(() =>
-        searchBoxContainerConfig.value.searchBoxes.filter(box => box.isUsed)
+        searchBoxContainerConfig.value.items.filter(box => box.isUsed)
     )
 
     const columns = computed({
@@ -91,19 +91,19 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
             searchUrl: '',
             ...box
         }
-        searchBoxContainerConfig.value.searchBoxes.push(newBox)
+        searchBoxContainerConfig.value.items.push(newBox)
         saveConfig()
     }
 
     // 删除搜索框
     function deleteSearchBox(index: number) {
-        searchBoxContainerConfig.value.searchBoxes.splice(index, 1)
+        searchBoxContainerConfig.value.items.splice(index, 1)
         saveConfig()
     }
 
     // 移动搜索框位置
     function moveSearchBox(fromIndex: number, toIndex: number) {
-        const boxes = searchBoxContainerConfig.value.searchBoxes
+        const boxes = searchBoxContainerConfig.value.items
         const originalLength = boxes.length
         if (
             fromIndex < 0 || fromIndex >= originalLength ||

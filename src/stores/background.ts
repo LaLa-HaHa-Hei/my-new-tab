@@ -14,7 +14,7 @@ export const useBackgroundStore = defineStore('background', () => {
             lastFetchTime: 0,
         },
         localImageConfig: {
-            imageUrl: './backgrounds/dye.png'
+            imageUrl: './background-images/dye.png'
         }
     })
     const backgroundConfig: Ref<BackgroundConfig> = ref<BackgroundConfig>(storage.getItem(BACKGROUND_CONFIG_KEY) || getDefaultConfig());

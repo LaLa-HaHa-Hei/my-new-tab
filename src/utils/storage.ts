@@ -1,14 +1,19 @@
 // 封装 localStorage 的读写操作
 
-export default {
+const STORAGE_PREFIX = 'mnt_' // My New Tab 前缀
 
+function withPrefix(key: string): string {
+    return `${STORAGE_PREFIX}${key}`;
+}
+
+export default {
     setItem<T = any>(key: string, value: T): void {
-        localStorage.setItem(key, JSON.stringify(value));
+        localStorage.setItem(withPrefix(key), JSON.stringify(value));
     },
 
     getItem<T = any>(key: string): T | undefined {
         try {
-            const item = localStorage.getItem(key);
+            const item = localStorage.getItem(withPrefix(key));
             if (item === null) return undefined;
             return JSON.parse(item) as T;
         } catch (e) {
@@ -18,6 +23,6 @@ export default {
     },
 
     removeItem(key: string): void {
-        localStorage.removeItem(key);
+        localStorage.removeItem(withPrefix(key));
     }
 }

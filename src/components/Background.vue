@@ -3,7 +3,7 @@
         <img :src="imageUrl" class="fixed left-0 top-0 -z-10 w-full h-full object-cover" alt="background" />
 
         <button @click="editDialogVisible = true"
-            class="fixed right-3 bottom-3 h-6 w-6 p-1 flex justify-center items-center cursor-pointer bg-white/20 text-white/50 hover:bg-white/30 rounded-full">
+            class="fixed right-3 bottom-3 h-6 w-6 p-1 flex justify-center items-center cursor-pointer bg-white/20 hover:bg-white/30 text-white/50 rounded-full">
             <IconEdit />
         </button>
     </Teleport>
@@ -103,7 +103,7 @@ const imageUrl = computed(
 const handleEditDialogClose = async (done: () => void) => {
     backgroundStore.saveConfig()
     done()
-    ElMessage.success('成功保存设置')
+    ElMessage.success('保存成功')
     // await updateBackgroundImg()
 }
 
@@ -111,7 +111,7 @@ const handleChange = async (uploadFile: any) => {
     try {
         const base64 = await fileToBase64(uploadFile.raw);
         backgroundStore.backgroundConfig.localImageConfig.imageUrl = base64;
-        ElMessage.success('成功设置图片')
+        ElMessage.success('设置图片成功')
     }
     catch (error) {
         ElMessage.error('设置图片失败')

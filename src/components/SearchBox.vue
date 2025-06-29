@@ -1,7 +1,7 @@
 <template>
     <div ref="containerRef" class="w-full h-11 flex flex-col relative font-medium">
-        <div class="flex items-center w-full h-full p-2 pl-3 rounded-lg border border-white/50"
-            :class="{ 'shadow-lg': isFocused, 'bg-white': isFocused, 'bg-white/60': !isFocused }">
+        <div class="flex items-center w-full h-full p-2 pl-3 rounded-lg border border-white/10"
+            :class="{ 'shadow-lg': isFocused, 'bg-white': isFocused, 'bg-white/50': !isFocused }">
             <!-- 左侧输入框 -->
             <input v-model="query" type="text" :placeholder="config.placeholder" @focus="isFocused = true"
                 @blur="isFocused = false" @keydown.enter="onSearch"
