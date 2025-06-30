@@ -1,7 +1,7 @@
 <template>
     <div ref="gridRef" class="w-full grid-stack">
         <div v-for="item in dashboardStore.dashboardConfig.items" :key="item.id" class="grid-stack-item" :gs-x="item.x"
-            :gs-y="item.y" :gs-w="item.w" :gs-h="item.h">
+            :gs-y="item.y" :gs-w="item.w" :gs-h="item.h" :data-id="item.id">
             <component :is="componentMap[item.component]" :config="item.props" />
         </div>
     </div>
@@ -15,10 +15,13 @@ import IconEdit from './icons/IconEdit.vue'
 import { useDashboardStore } from '@/stores/dashboard'
 import { da } from 'element-plus/es/locales.mjs';
 import BookmarkItem from './BookmarkItem.vue'
+import type { DashboardConfig } from "@/types";
+import MemoWidget from './widgets/MemoWidget.vue'
 
 // 组件映射表
 const componentMap: Record<string, any> = {
     "BookmarkItem": BookmarkItem,
+    "MemoWidget": MemoWidget,
 }
 
 const gridRef = ref<HTMLDivElement | null>(null)
@@ -32,6 +35,22 @@ onMounted(() => {
             column: cols,
             float: true, // 允许自由排列
         }, gridRef.value)
+
+        grid.on('change', (event, items) => {
+            items.forEach(item => {
+                const id = item.el?.dataset?.id
+
+                const target = dashboardStore.dashboardConfig.items.find(i => i.id === id)
+                if (target) {
+                    target.x = item.x ?? target.x
+                    target.y = item.y ?? target.y
+                    target.w = item.w ?? target.w
+                    target.h = item.h ?? target.h
+
+                    dashboardStore.saveConfig()
+                }
+            })
+        })
 
         window.addEventListener('resize', handleResize)
     }
@@ -49,6 +68,8 @@ onUnmounted(() => {
         grid.destroy(false)
         grid = null
     }
+
+    window.removeEventListener('resize', handleResize)
 })
 </script>
 

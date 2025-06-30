@@ -17,21 +17,21 @@ export const useBackgroundStore = defineStore('background', () => {
             imageUrl: './background-images/dye.png'
         }
     })
-    const backgroundConfig: Ref<BackgroundConfig> = ref<BackgroundConfig>(storage.getItem(BACKGROUND_CONFIG_KEY) || getDefaultConfig());
+    const config: Ref<BackgroundConfig> = ref<BackgroundConfig>(storage.getItem(BACKGROUND_CONFIG_KEY) || getDefaultConfig());
 
     // 保存配置
     function saveConfig() {
-        storage.setItem(BACKGROUND_CONFIG_KEY, backgroundConfig.value);
+        storage.setItem(BACKGROUND_CONFIG_KEY, config.value);
     }
 
     // 重置为默认配置
     function resetToDefault() {
-        backgroundConfig.value = getDefaultConfig()
+        config.value = getDefaultConfig()
         saveConfig()
     }
 
     return {
-        backgroundConfig,
+        backgroundConfig: config,
         getDefaultConfig,
         saveConfig,
         resetToDefault,

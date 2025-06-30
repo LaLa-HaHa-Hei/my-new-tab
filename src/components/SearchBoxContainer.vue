@@ -1,6 +1,6 @@
 <template>
     <div class="w-full grid gap-2"
-        :class="{ 'grid-cols-1': searchBoxStore.columns === 1, 'grid-cols-2': searchBoxStore.columns === 2, 'grid-cols-3': searchBoxStore.columns === 3, 'grid-cols-4': searchBoxStore.columns === 4, 'grid-cols-5': searchBoxStore.columns === 5, 'grid-cols-6': searchBoxStore.columns === 6, }">
+        :class="{ 'grid-cols-1': searchBoxStore.containerConfig.columns === 1, 'grid-cols-2': searchBoxStore.containerConfig.columns === 2, 'grid-cols-3': searchBoxStore.containerConfig.columns === 3, 'grid-cols-4': searchBoxStore.containerConfig.columns === 4, 'grid-cols-5': searchBoxStore.containerConfig.columns === 5, 'grid-cols-6': searchBoxStore.containerConfig.columns === 6, }">
         <template v-for="item in searchBoxStore.usedSearchBoxes" :key="item.id">
             <SearchBox v-if="item.isUsed" :config="item" />
         </template>
@@ -19,15 +19,14 @@
         <div class="flex justify-between">
             <div>
                 <span>列数：</span>
-                <el-input-number size="small" v-model="searchBoxStore.searchBoxContainerConfig.columns" :min="1"
-                    :max="6" />
+                <el-input-number size="small" v-model="searchBoxStore.containerConfig.columns" :min="1" :max="6" />
             </div>
             <div><span>注意：该弹窗口关闭后才会保存更改到本地</span></div>
             <div>
                 <el-button type="primary" size="small" @click="addDialogVisible = true">添加</el-button>
             </div>
         </div>
-        <el-table :data="searchBoxStore.searchBoxes" border class="w-full mt-3">
+        <el-table :data="searchBoxStore.containerConfig.items" border class="w-full mt-3">
             <el-table-column label="使用" width="55">
                 <template #default="scope"><el-switch size="small" v-model="scope.row.isUsed" /></template>
             </el-table-column>
@@ -78,7 +77,7 @@
 </template>
 
 <script setup lang="ts">
-import type { SearchBoxConfig, SearchBoxContainerConfig } from '@/types'
+import type { SearchBoxConfig } from '@/types'
 import { ref } from 'vue'
 import SearchBox from './SearchBox.vue'
 import IconEdit from './icons/IconEdit.vue'
@@ -113,7 +112,7 @@ const handleMoveUp = (index: number) => {
 }
 
 const handleMoveDown = (index: number) => {
-    if (index >= searchBoxStore.searchBoxes.length - 1) return
+    if (index >= searchBoxStore.containerConfig.items.length - 1) return
     searchBoxStore.moveSearchBox(index, index + 1)
 }
 

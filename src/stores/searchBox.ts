@@ -6,7 +6,7 @@ import storage from '@/utils/storage';
 const SEARCH_BOX_CONTAINER_CONFIG_KEY = 'searchBoxContainerConfig'
 export const useSearchBoxStore = defineStore('searchBox', () => {
     const getDefaultConfig = (): SearchBoxContainerConfig => ({
-        columns: 3,
+        columns: 4,
         items: [
             {
                 id: '1751116407846',
@@ -52,6 +52,13 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
             },
             {
                 id: '1751116407849',
+                isUsed: true,
+                placeholder: 'GitHub',
+                icon: "./search-engine-icons/github.png",
+                searchUrl: 'https://github.com/search?q=%s&type=repositories'
+            },
+            {
+                id: '1751116407850',
                 isUsed: false,
                 placeholder: '矢量图',
                 icon: "./search-engine-icons/iconfont.svg",
@@ -59,26 +66,16 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
             },
         ]
     })
-    const searchBoxContainerConfig: Ref<SearchBoxContainerConfig> = ref<SearchBoxContainerConfig>(storage.getItem(SEARCH_BOX_CONTAINER_CONFIG_KEY) || getDefaultConfig());
-
-    const searchBoxes = computed(() => searchBoxContainerConfig.value.items)
+    const containerConfig: Ref<SearchBoxContainerConfig> = ref<SearchBoxContainerConfig>(storage.getItem(SEARCH_BOX_CONTAINER_CONFIG_KEY) || getDefaultConfig());
 
     // 仅获取已启用的搜索框
     const usedSearchBoxes = computed(() =>
-        searchBoxContainerConfig.value.items.filter(box => box.isUsed)
+        containerConfig.value.items.filter(box => box.isUsed)
     )
-
-    const columns = computed({
-        get: () => searchBoxContainerConfig.value.columns,
-        set: (val: number) => {
-            searchBoxContainerConfig.value.columns = val
-            saveConfig() // 可选：每次更新都保存
-        }
-    })
 
     // 保存配置
     function saveConfig() {
-        storage.setItem(SEARCH_BOX_CONTAINER_CONFIG_KEY, searchBoxContainerConfig.value);
+        storage.setItem(SEARCH_BOX_CONTAINER_CONFIG_KEY, containerConfig.value);
     }
 
     // 添加新搜索框
@@ -91,19 +88,19 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
             searchUrl: '',
             ...box
         }
-        searchBoxContainerConfig.value.items.push(newBox)
+        containerConfig.value.items.push(newBox)
         saveConfig()
     }
 
     // 删除搜索框
     function deleteSearchBox(index: number) {
-        searchBoxContainerConfig.value.items.splice(index, 1)
+        containerConfig.value.items.splice(index, 1)
         saveConfig()
     }
 
     // 移动搜索框位置
     function moveSearchBox(fromIndex: number, toIndex: number) {
-        const boxes = searchBoxContainerConfig.value.items
+        const boxes = containerConfig.value.items
         const originalLength = boxes.length
         if (
             fromIndex < 0 || fromIndex >= originalLength ||
@@ -124,16 +121,14 @@ export const useSearchBoxStore = defineStore('searchBox', () => {
 
     // 重置为默认配置
     function resetToDefault() {
-        searchBoxContainerConfig.value = getDefaultConfig()
+        containerConfig.value = getDefaultConfig()
         saveConfig()
     }
 
     return {
         getDefaultConfig,
-        searchBoxContainerConfig,
-        searchBoxes,
+        containerConfig,
         usedSearchBoxes,
-        columns,
         saveConfig,
         addSearchBox,
         deleteSearchBox,
